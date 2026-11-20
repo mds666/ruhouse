@@ -1,0 +1,9 @@
+.qa/
+.qa-cloud/
+.chrome-*/
+.preview-*.png
+.tmp/
+node_modules/
+dist/
+.deploy/
+*.zip

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f2ec">
+  <meta name="description" content="查看一条经过审核的匿名租房房间记录。">
+  <title>房间记录｜垃圾房子 Rubbish House</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="post">
+  <div data-site-header></div>
+
+  <main class="page shell article-page">
+    <a class="back-link" href="wall.html"><span aria-hidden="true">←</span> 返回避雷墙</a>
+    <div id="articleState" class="article-state" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <span>正在读取房间记录</span>
+    </div>
+    <article id="articleRoot" hidden></article>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="config.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script type="module" src="js/post.js"></script>
+</body>
+</html>

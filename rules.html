@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f2ec">
+  <meta name="description" content="Rubbish House 发帖、隐私与审核规则。只记录房间，不曝光、不攻击任何人。">
+  <title>发帖与审核规则｜垃圾房子</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="rules">
+  <div data-site-header></div>
+
+  <main class="page shell rules-page">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">HOUSE RULES <span>/</span> 发帖与审核规则</p>
+        <h1>只记录房间，<br>不记录人。</h1>
+        <p class="page-intro">先看清楚边界，再决定要不要发布。这里需要的是可验证的居住经历，不是对任何人的控诉。</p>
+      </div>
+      <div class="page-side-note">
+        <p>发布之前</p>
+        <strong>只写房间状况<br>审核通过后公开</strong>
+        <a class="text-link" href="submit.html">记录一间房 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <section class="rules-principle" aria-label="网站原则">
+      <p class="eyebrow">OUR BOUNDARY</p>
+      <blockquote>垃圾房子是一个帮后来者避坑的地方，不是用来曝光或攻击任何人的工具。</blockquote>
+    </section>
+
+    <div class="rules-layout">
+      <aside class="rules-index" aria-label="规则目录">
+        <span>CONTENTS</span>
+        <a href="#publish">01 可以发什么</a>
+        <a href="#forbidden">02 绝对不可以</a>
+        <a href="#review">03 审核与修改</a>
+        <a href="#reward">04 首月奖励</a>
+      </aside>
+
+      <div class="rules-content">
+        <section id="publish">
+          <span class="section-number">01</span>
+          <div>
+            <h2>可以这样发帖</h2>
+            <ul class="rule-list">
+              <li>描述房间内的真实状况：异味来源、发霉位置、破旧的家具。</li>
+              <li>描述你的身体反应：住进去几天后口干、眼睛刺痒、睡不着。</li>
+              <li>上传现场实拍的照片，作为最直接的证据。</li>
+              <li>用中性表述，例如「房东声称已做过除醛」。</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="forbidden">
+          <span class="section-number">02</span>
+          <div>
+            <h2>绝对不可以</h2>
+            <ul class="rule-list rule-list--forbidden">
+              <li><strong>透露定位：</strong>城市区域、小区/楼盘名、路名、地铁站、门牌号、楼栋房号。</li>
+              <li><strong>透露房间名：</strong>房间的具体名称、房号、房型代号。</li>
+              <li><strong>透露房东信息：</strong>姓名、称谓搭配姓名、电话、微信号、身份证、门锁密码。</li>
+              <li><strong>上传他人照片：</strong>与租房无关的他人照片，或带有他人隐私的画面。</li>
+              <li><strong>曝光或攻击：</strong>对房东、中介、室友或其他人的辱骂、人身攻击和隐私曝光。</li>
+            </ul>
+            <p class="rule-footnote">出现以上任一信息，帖子会被退回或移除。请不要用别人的隐私来证明房间的问题。</p>
+          </div>
+        </section>
+
+        <section id="review">
+          <span class="section-number">03</span>
+          <div>
+            <h2>审核与修改</h2>
+            <p>发布时会先对文字做实时隐私检测，然后进入管理员人工审核。命中高危规则的帖子将无法发布。</p>
+            <p>审核通过后，记录才会出现在避雷墙。已通过和待审核的记录都可以在个人中心修改；修改后会重新进入审核，审核期间暂时隐藏。</p>
+            <p>你也可以在个人中心删除自己的记录。删除后不会再出现在任何公开页面。</p>
+            <p>违规内容会被移除，已发放的奖励会被取消。</p>
+          </div>
+        </section>
+
+        <section id="reward">
+          <span class="section-number">04</span>
+          <div>
+            <h2>首月奖励规则</h2>
+            <div class="reward-rules">
+              <div>
+                <span>结算周期</span>
+                <p>应用上线首月（2026-11）</p>
+              </div>
+              <div>
+                <span>计分方式</span>
+                <p>你的避雷帖获得的投票数 + 收到的评论数 = 总分</p>
+              </div>
+              <div>
+                <span>奖励</span>
+                <p>同一用户多条帖子的分数合并计算，首月总分最高的用户获得 100 元现金奖励。</p>
+              </div>
+              <div>
+                <span>发放</span>
+                <p>首月结束后会在站内公布结果，并由管理员联系获奖者发放。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="config.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script type="module" src="js/rules.js"></script>
+</body>
+</html>

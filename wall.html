@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f2ec">
+  <meta name="description" content="Rubbish House 避雷墙：经过人工审核的匿名租房房间记录。">
+  <title>避雷墙｜垃圾房子 Rubbish House</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="wall">
+  <div data-site-header></div>
+
+  <main class="page shell">
+    <header class="page-heading page-heading--wall">
+      <div>
+        <p class="eyebrow">THE WALL <span>/</span> 匿名房间记录</p>
+        <h1>避雷墙</h1>
+        <p class="page-intro">每条记录都先经过人工审核。只公开房间本身，不公开地址、房间名和房东信息。</p>
+      </div>
+      <div class="page-side-note">
+        <p>首月记录奖励</p>
+        <strong>投票与评论最高的一条<br>获得 ¥100 现金。</strong>
+        <a class="text-link" href="rules.html">活动规则 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <section class="wall-section" aria-label="房间记录">
+      <div class="wall-toolbar">
+        <div class="tabs" role="tablist" aria-label="排序">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true" data-sort="latest">最新</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-sort="hot">最热</button>
+        </div>
+        <span class="wall-count" id="wallCount">正在读取…</span>
+      </div>
+
+      <div class="wall-state" id="wallState" aria-live="polite">
+        <span class="loader" aria-hidden="true"></span>
+        <span>正在读取已审核记录</span>
+      </div>
+      <div class="post-list" id="postGrid"></div>
+      <nav class="pagination" id="pagination" aria-label="帖子分页" hidden></nav>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="config.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script type="module" src="js/wall.js"></script>
+</body>
+</html>

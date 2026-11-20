@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f2ec">
+  <meta name="description" content="个人中心：查看自己的房间记录、审核状态和修改入口。">
+  <title>个人中心｜垃圾房子 Rubbish House</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="me">
+  <div data-site-header></div>
+
+  <main class="page shell member-page">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">PERSONAL ARCHIVE <span>/</span> 个人中心</p>
+        <h1>我的房间记录</h1>
+        <p class="page-intro">已通过和待审核的记录都可以修改。修改后会重新进入审核，进度会显示在这里。</p>
+      </div>
+      <div class="page-side-note">
+        <p>当前身份</p>
+        <strong>匿名租客<br>仅保存在当前浏览器</strong>
+        <a class="text-link" href="submit.html">发布新记录 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <div class="identity-note">
+      <span class="identity-note__mark" aria-hidden="true">匿</span>
+      <p>这是当前浏览器的匿名身份。清除浏览器数据或换设备后，将无法再找回这里的历史记录。</p>
+    </div>
+
+    <div class="page-banner" id="meBanner" hidden></div>
+
+    <div class="member-toolbar">
+      <div class="tabs" role="tablist" aria-label="筛选审核状态">
+        <button class="tab is-active" type="button" role="tab" aria-selected="true" data-status="all">全部 <span data-tab-count="all">0</span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-status="pending">待审核 <span data-tab-count="pending">0</span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-status="approved">已通过 <span data-tab-count="approved">0</span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-status="rejected">未通过 <span data-tab-count="rejected">0</span></button>
+      </div>
+      <button class="text-button" type="button" id="refreshPosts">刷新</button>
+    </div>
+
+    <div class="member-state" id="memberState" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <span>正在读取我的记录</span>
+    </div>
+    <section class="my-posts" id="myPosts" aria-live="polite"></section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="config.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script type="module" src="js/me.js"></script>
+</body>
+</html>

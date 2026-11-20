@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f2ec">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Rubbish House 管理员审核台。">
+  <title>管理员审核台｜垃圾房子</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="admin">
+  <div data-site-header></div>
+
+  <main class="page shell admin-page">
+    <section class="admin-auth" id="adminAuth">
+      <div class="admin-auth__intro">
+        <p class="eyebrow">ADMIN REVIEW <span>/</span> 管理员</p>
+        <h1>审核台</h1>
+        <p>所有新记录和修改后的记录都会先来到这里。只有管理员审核通过，才会出现在避雷墙。</p>
+      </div>
+      <form class="admin-login" id="adminLogin" novalidate>
+        <div class="admin-login__head">
+          <h2>管理员登录</h2>
+          <p>使用在 Supabase 中配置的管理员邮箱和密码。</p>
+        </div>
+        <label class="field">
+          <span class="field__label"><span>邮箱</span></span>
+          <input id="adminEmail" type="email" autocomplete="email" placeholder="admin@example.com">
+        </label>
+        <label class="field">
+          <span class="field__label"><span>密码</span></span>
+          <input id="adminPassword" type="password" autocomplete="current-password" placeholder="请输入管理员密码">
+        </label>
+        <p class="form-hint form-hint--error" id="adminLoginError" hidden></p>
+        <button class="btn btn--primary btn--full" id="adminLoginButton" type="submit">登录审核台</button>
+        <p class="admin-login__note">管理员账号由站点维护者在 Supabase Authentication 中创建。</p>
+      </form>
+    </section>
+
+    <section class="admin-dashboard" id="adminDashboard" hidden>
+      <header class="admin-heading">
+        <div>
+          <p class="eyebrow">REVIEW DESK <span>/</span> 管理后台</p>
+          <h1>审核台</h1>
+        </div>
+        <div class="admin-identity">
+          <span id="adminEmailLabel">—</span>
+          <button class="text-button" type="button" id="adminLogout">退出</button>
+        </div>
+      </header>
+
+      <div class="admin-stats">
+        <article class="stat-card">
+          <span>待审核</span>
+          <strong data-stat="pending">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>已通过</span>
+          <strong data-stat="approved">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>未通过</span>
+          <strong data-stat="rejected">0</strong>
+        </article>
+      </div>
+
+      <div class="admin-toolbar">
+        <div class="tabs" role="tablist" aria-label="筛选审核状态">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true" data-admin-filter="pending">待审核</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-admin-filter="approved">已通过</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-admin-filter="rejected">未通过</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-admin-filter="all">全部</button>
+        </div>
+        <button class="text-button" type="button" id="adminRefresh">刷新</button>
+      </div>
+
+      <div class="admin-state" id="adminState" aria-live="polite">
+        <span class="loader" aria-hidden="true"></span>
+        <span>正在读取审核队列</span>
+      </div>
+      <div class="review-list" id="adminList"></div>
+    </section>
+  </main>
+
+  <dialog class="dialog" id="rejectDialog" aria-labelledby="rejectTitle">
+    <form class="dialog__panel" id="rejectForm">
+      <div class="dialog__head">
+        <div>
+          <p class="eyebrow">REJECT <span>/</span> 审核说明</p>
+          <h2 id="rejectTitle">不通过这条记录</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-reject aria-label="关闭">×</button>
+      </div>
+      <p class="dialog__intro" id="rejectPostTitle"></p>
+      <label class="field">
+        <span class="field__label"><span>给发布者的说明 <b>必填</b></span><small>2—200 字</small></span>
+        <textarea id="rejectNote" rows="5" maxlength="200" placeholder="请说明需要修改或删除的内容，例如：照片里出现了门牌号，请裁掉后重新提交。"></textarea>
+      </label>
+      <p class="form-hint form-hint--error" id="rejectError" hidden></p>
+      <div class="dialog__actions">
+        <button class="btn btn--outline" type="button" data-close-reject>取消</button>
+        <button class="btn btn--danger" type="submit" id="rejectConfirm">确认不通过</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div data-site-footer></div>
+
+  <script src="config.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
