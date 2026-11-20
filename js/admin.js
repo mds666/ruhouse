@@ -39,6 +39,10 @@ const elements = {
   deleteEmailInput: document.getElementById("deleteEmailInput"),
   deleteEmailButton: document.getElementById("deleteEmailButton"),
   deleteEmailState: document.getElementById("deleteEmailState"),
+  emailAccountList: document.getElementById("emailAccountList"),
+  emailAccountState: document.getElementById("emailAccountState"),
+  emailAccountCount: document.getElementById("emailAccountCount"),
+  refreshEmailAccounts: document.getElementById("refreshEmailAccounts"),
   rejectDialog: document.getElementById("rejectDialog"),
   rejectForm: document.getElementById("rejectForm"),
   rejectTitle: document.getElementById("rejectTitle"),
@@ -55,7 +59,9 @@ const state = {
   adminUser: null,
   rejectId: null,
   reportedComments: [],
-  commentsLoading: false
+  commentsLoading: false,
+  emailAccounts: [],
+  emailAccountsLoading: false
 };
 
 function showLogin(message = "") {
@@ -75,6 +81,7 @@ function showDashboard(user) {
   elements.dashboard.hidden = false;
   elements.adminEmailLabel.textContent = user?.email || "管理员";
   loadQueue();
+  loadEmailAccounts();
 }
 
 function setQueueState(message = "", loading = false) {
@@ -93,6 +100,125 @@ function setCommentState(message = "", loading = false) {
       ? '<span class="loader" aria-hidden="true"></span><span>' + escapeHTML(message) + "</span>"
       : "<p>" + escapeHTML(message) + "</p>")
     : "";
+}
+
+function setEmailAccountState(message = "", loading = false) {
+  elements.emailAccountState.hidden = !message;
+  elements.emailAccountState.innerHTML = message
+    ? (loading
+      ? '<span class="loader" aria-hidden="true"></span><span>' + escapeHTML(message) + "</span>"
+      : "<p>" + escapeHTML(message) + "</p>")
+    : "";
+}
+
+function emailAccountBadges(account) {
+  const badges = [];
+  if (account.is_self) badges.push("当前账号");
+  if (account.is_admin) badges.push("管理员");
+  if (!account.email_confirmed_at) badges.push("邮箱未确认");
+  return badges.map((badge) => '<span class="account-badge">' + escapeHTML(badge) + "</span>").join("");
+}
+
+function emailAccountRow(account) {
+  const created = account.created_at
+    ? '注册 ' + formatDateTime(account.created_at)
+    : "注册时间未知";
+  const lastSeen = account.last_sign_in_at
+    ? '最后登录 ' + formatDateTime(account.last_sign_in_at)
+    : "从未登录";
+  const locked = account.is_admin || account.is_self;
+  return `
+    <article class="admin-email-row">
+      <div class="admin-email-row__main">
+        <strong>${escapeHTML(account.email)}</strong>
+        <div class="admin-email-row__badges">${emailAccountBadges(account)}</div>
+      </div>
+      <div class="admin-email-row__meta">
+        <span>${escapeHTML(created)}</span>
+        <span>${escapeHTML(lastSeen)}</span>
+      </div>
+      <div class="admin-email-row__action">
+        ${locked
+          ? '<span class="admin-email-row__locked">不可在这里删除</span>'
+          : '<button class="text-button text-button--danger" type="button" data-delete-account="' + escapeHTML(account.email) + '">删除</button>'}
+      </div>
+    </article>
+  `;
+}
+
+function renderEmailAccounts() {
+  elements.emailAccountCount.textContent = String(state.emailAccounts.length);
+  if (state.emailAccountsLoading) {
+    setEmailAccountState("正在读取邮箱列表", true);
+    elements.emailAccountList.innerHTML = "";
+    return;
+  }
+  if (!state.emailAccounts.length) {
+    setEmailAccountState("还没有注册邮箱。", false);
+    elements.emailAccountList.innerHTML = "";
+    return;
+  }
+  setEmailAccountState("", false);
+  elements.emailAccountList.innerHTML = state.emailAccounts.map(emailAccountRow).join("");
+}
+
+async function loadEmailAccounts() {
+  if (state.emailAccountsLoading) return;
+  state.emailAccountsLoading = true;
+  renderEmailAccounts();
+  try {
+    state.emailAccounts = await api.adminListEmailAccounts();
+    state.emailAccountsLoading = false;
+    renderEmailAccounts();
+  } catch (error) {
+    state.emailAccountsLoading = false;
+    state.emailAccounts = [];
+    elements.emailAccountList.innerHTML = "";
+    elements.emailAccountCount.textContent = "读取失败";
+    elements.emailAccountState.hidden = false;
+    renderError(elements.emailAccountState, error, loadEmailAccounts);
+  }
+}
+
+async function deleteEmailAccount(email, button) {
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized || !normalized.includes("@")) {
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint form-hint--error";
+    elements.deleteEmailState.textContent = "请输入有效邮箱。";
+    return;
+  }
+
+  if (!window.confirm(
+    "删除 " + normalized + " 的邮箱账号？\n\n帖子会继续公开保留，但用户将无法再登录和编辑。管理员账号不能删除。"
+  )) return;
+
+  const originalText = button?.textContent || "删除邮箱账号";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "删除中…";
+  }
+  elements.deleteEmailState.hidden = true;
+  try {
+    const result = await api.adminDeleteEmailAccount(normalized);
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint";
+    elements.deleteEmailState.textContent = result.warning
+      ? result.warning
+      : "邮箱账号已删除。帖子已保留，用户现在只能以新的匿名身份使用网站。";
+    elements.deleteEmailInput.value = "";
+    showToast("邮箱账号已删除，帖子已保留。", "success", 5000);
+    await loadEmailAccounts();
+  } catch (error) {
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint form-hint--error";
+    elements.deleteEmailState.textContent = friendlyError(error);
+  } finally {
+    if (button?.isConnected) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
 }
 
 function updateStats(stats) {
@@ -356,42 +482,25 @@ elements.commentQueue.addEventListener("click", (event) => {
 
 elements.commentRefresh.addEventListener("click", loadComments);
 
-elements.deleteEmailForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const email = elements.deleteEmailInput.value.trim().toLowerCase();
-  elements.deleteEmailState.hidden = true;
+elements.refreshEmailAccounts.addEventListener("click", loadEmailAccounts);
 
-  if (!email || !email.includes("@")) {
+elements.emailAccountList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-delete-account]");
+  if (!button) return;
+  deleteEmailAccount(button.dataset.deleteAccount, button);
+});
+
+elements.deleteEmailForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = elements.deleteEmailInput.value.trim();
+  if (!email) {
     elements.deleteEmailState.hidden = false;
     elements.deleteEmailState.className = "form-hint form-hint--error";
     elements.deleteEmailState.textContent = "请输入有效邮箱。";
     elements.deleteEmailInput.focus();
     return;
   }
-
-  if (!window.confirm(
-    "删除 " + email + " 的邮箱账号？\n\n帖子会继续公开保留，但用户将无法再登录和编辑。管理员账号不能删除。"
-  )) return;
-
-  elements.deleteEmailButton.disabled = true;
-  elements.deleteEmailButton.textContent = "删除中…";
-  try {
-    const result = await api.adminDeleteEmailAccount(email);
-    elements.deleteEmailState.hidden = false;
-    elements.deleteEmailState.className = "form-hint";
-    elements.deleteEmailState.textContent = result.warning
-      ? result.warning
-      : "邮箱账号已删除。帖子已保留，用户现在只能以新的匿名身份使用网站。";
-    elements.deleteEmailInput.value = "";
-    showToast("邮箱账号已删除，帖子已保留。", "success", 5000);
-  } catch (error) {
-    elements.deleteEmailState.hidden = false;
-    elements.deleteEmailState.className = "form-hint form-hint--error";
-    elements.deleteEmailState.textContent = friendlyError(error);
-  } finally {
-    elements.deleteEmailButton.disabled = false;
-    elements.deleteEmailButton.textContent = "删除邮箱账号";
-  }
+  deleteEmailAccount(email, elements.deleteEmailButton);
 });
 
 elements.filterTabs.forEach((tab) => {

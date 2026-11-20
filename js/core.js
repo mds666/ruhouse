@@ -276,6 +276,33 @@ export const api = {
     return Array.isArray(rows) ? rows[0] || null : null;
   },
 
+  async adminListEmailAccounts() {
+    const db = requireClient();
+    const { data: { session } } = await db.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error("登录状态已失效，请重新登录。");
+    }
+
+    const response = await fetch("/.netlify/functions/admin-delete-user", {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + session.access_token
+      }
+    });
+
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch {
+      payload = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(payload?.error || "读取邮箱账号失败。");
+    }
+    return Array.isArray(payload?.users) ? payload.users : [];
+  },
+
   async adminDeleteEmailAccount(email) {
     const db = requireClient();
     const { data: { session } } = await db.auth.getSession();

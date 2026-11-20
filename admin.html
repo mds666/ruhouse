@@ -117,6 +117,21 @@
           <span class="status status--pending"><i aria-hidden="true"></i>危险操作</span>
         </div>
         <p class="admin-account-warning">删除后这个邮箱无法再登录。帖子会继续公开保留，但不再属于任何个人中心，用户也不能再编辑。管理员账号不能在这里删除。</p>
+
+        <div class="admin-accounts-toolbar">
+          <div>
+            <p class="eyebrow">REGISTERED EMAILS <span>/</span> 已注册邮箱</p>
+            <h3>邮箱列表 <span class="count-badge" id="emailAccountCount">0</span></h3>
+          </div>
+          <button class="text-button" type="button" id="refreshEmailAccounts">刷新列表</button>
+        </div>
+        <div class="admin-state" id="emailAccountState" aria-live="polite">
+          <span class="loader" aria-hidden="true"></span>
+          <span>正在读取邮箱列表</span>
+        </div>
+        <div class="admin-email-list" id="emailAccountList"></div>
+
+        <h3 class="admin-subheading">直接按邮箱删除</h3>
         <form class="admin-delete-form" id="deleteEmailForm" novalidate>
           <label class="field">
             <span class="field__label"><span>要删除的邮箱</span></span>
