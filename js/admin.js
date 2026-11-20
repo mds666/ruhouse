@@ -103,6 +103,9 @@ function updateStats(stats) {
 }
 
 function commentReviewItem(comment) {
+  const reasons = Array.isArray(comment.report_reasons) && comment.report_reasons.length
+    ? [...new Set(comment.report_reasons)].join("、")
+    : "未填写";
   return `
     <article class="comment-review-item" data-comment-review-id="${escapeHTML(comment.id)}">
       <div class="comment-review-item__topline">
@@ -110,6 +113,7 @@ function commentReviewItem(comment) {
         <span>${formatDateTime(comment.created_at)}</span>
       </div>
       <p class="comment-review-item__content">${escapeHTML(comment.content)}</p>
+      <p class="comment-review-item__reasons">举报原因：${escapeHTML(reasons)}</p>
       <p class="comment-review-item__meta">
         ${escapeHTML(comment.author_label || "匿名租客")} · 来自「${escapeHTML(comment.post_title || "房间记录")}」
       </p>

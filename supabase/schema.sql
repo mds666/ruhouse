@@ -126,9 +126,21 @@ create index if not exists rh_comments_status_idx
 create table if not exists public.rh_comment_reports (
   comment_id uuid not null references public.rh_comments(id) on delete cascade,
   reporter_id uuid not null references auth.users(id) on delete cascade,
+  reason text not null default '其他',
   created_at timestamptz not null default now(),
-  primary key (comment_id, reporter_id)
+  primary key (comment_id, reporter_id),
+  constraint rh_comment_reports_reason_len check (char_length(btrim(reason)) between 2 and 20)
 );
+
+alter table public.rh_comment_reports
+  add column if not exists reason text not null default '其他';
+
+alter table public.rh_comment_reports
+  drop constraint if exists rh_comment_reports_reason_len;
+
+alter table public.rh_comment_reports
+  add constraint rh_comment_reports_reason_len
+  check (char_length(btrim(reason)) between 2 and 20);
 
 create index if not exists rh_comment_reports_created_idx
   on public.rh_comment_reports (created_at desc);
@@ -180,6 +192,51 @@ begin
 end;
 $$;
 
+create or replace function public.rh_has_private_address(p_text text)
+returns boolean
+language plpgsql
+immutable
+set search_path = public, pg_temp
+as $$
+declare
+  v_text text := coalesce(p_text, '');
+begin
+  if v_text ~ '(号楼|栋|幢|单元|门牌|房号|房间号)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,8}' then
+    return true;
+  end if;
+
+  if v_text ~ '(房号|房间号)[[:space:]]*[A-Za-z0-9-]{1,10}' then
+    return true;
+  end if;
+
+  if v_text ~ '[0-9]{2,4}[[:space:]]*(室|层)' then
+    return true;
+  end if;
+
+  if v_text ~ '[0-9一二三四五六七八九十百零〇]{1,5}[[:space:]]*(号|弄)' then
+    return true;
+  end if;
+
+  if v_text ~ '(路|街|巷|弄)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,5}' then
+    return true;
+  end if;
+
+  if v_text ~ '(小区|花园|公寓|大厦|广场|新村|家园|苑).{0,12}(号楼|栋|幢|单元|室|号)' then
+    return true;
+  end if;
+
+  if v_text ~ '(房东|中介|管家|经纪人).{0,10}(姓|电话|手机号|微信|身份证)' then
+    return true;
+  end if;
+
+  if v_text ~* '(微信|vx|v信|qq|电话|手机号|联系方式)[[:space:]]*[:：]?[[:space:]]*[A-Za-z0-9_-]{5,}' then
+    return true;
+  end if;
+
+  return false;
+end;
+$$;
+
 create or replace function public.rh_is_admin()
 returns boolean
 language sql
@@ -204,10 +261,62 @@ begin
 end;
 $$;
 
+create or replace function public.rh_enforce_private_text()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if tg_table_name = 'rh_posts' then
+    if tg_op = 'INSERT' then
+      if public.rh_has_private_address(new.title || ' ' || new.body) then
+        raise exception '文字里疑似包含地址、房间号或联系方式，请删除后再发布。' using errcode = '22023';
+      end if;
+    elsif new.title is distinct from old.title or new.body is distinct from old.body then
+      if public.rh_has_private_address(new.title || ' ' || new.body) then
+        raise exception '文字里疑似包含地址、房间号或联系方式，请删除后再发布。' using errcode = '22023';
+      end if;
+    end if;
+  elsif tg_table_name = 'rh_comments' then
+    if tg_op = 'INSERT' then
+      if public.rh_has_private_address(new.content) then
+        raise exception '评论里疑似包含地址、房间号或联系方式，请删除后再发布。' using errcode = '22023';
+      end if;
+    elsif new.content is distinct from old.content then
+      if public.rh_has_private_address(new.content) then
+        raise exception '评论里疑似包含地址、房间号或联系方式，请删除后再发布。' using errcode = '22023';
+      end if;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
 drop trigger if exists rh_posts_touch_updated_at on public.rh_posts;
 create trigger rh_posts_touch_updated_at
 before update on public.rh_posts
 for each row execute function public.rh_touch_updated_at();
+
+drop trigger if exists rh_posts_privacy_insert on public.rh_posts;
+create trigger rh_posts_privacy_insert
+before insert on public.rh_posts
+for each row execute function public.rh_enforce_private_text();
+
+drop trigger if exists rh_posts_privacy_update on public.rh_posts;
+create trigger rh_posts_privacy_update
+before update of title, body on public.rh_posts
+for each row execute function public.rh_enforce_private_text();
+
+drop trigger if exists rh_comments_privacy_insert on public.rh_comments;
+create trigger rh_comments_privacy_insert
+before insert on public.rh_comments
+for each row execute function public.rh_enforce_private_text();
+
+drop trigger if exists rh_comments_privacy_update on public.rh_comments;
+create trigger rh_comments_privacy_update
+before update of content on public.rh_comments
+for each row execute function public.rh_enforce_private_text();
 
 -- ------------------------------------------------------------
 -- Public reads
@@ -961,7 +1070,12 @@ $$;
 -- Comment reports / moderation
 -- ------------------------------------------------------------
 
-create or replace function public.rh_report_comment(p_comment_id uuid)
+drop function if exists public.rh_report_comment(uuid);
+
+create or replace function public.rh_report_comment(
+  p_comment_id uuid,
+  p_reason text
+)
 returns table (id uuid, comments_count integer)
 language plpgsql
 volatile
@@ -970,16 +1084,31 @@ set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := auth.uid();
+  v_reason text := btrim(coalesce(p_reason, '其他'));
   v_post_id uuid;
   v_author_id uuid;
   v_is_immune boolean;
   v_is_hidden boolean;
   v_status text;
   v_inserted integer := 0;
+  v_recent integer := 0;
   v_count integer;
 begin
   if v_user is null then
     raise exception '请先完成匿名身份初始化。' using errcode = '42501';
+  end if;
+
+  if v_reason not in ('隐私信息', '人身攻击', '广告引流', '不实信息', '其他') then
+    raise exception '举报原因不合法。' using errcode = '22023';
+  end if;
+
+  select count(*)::integer into v_recent
+  from public.rh_comment_reports r
+  where r.reporter_id = v_user
+    and r.created_at > now() - interval '24 hours';
+
+  if v_recent >= 5 then
+    raise exception '24 小时内最多举报 5 次，请明天再试。' using errcode = '22023';
   end if;
 
   select c.post_id, c.user_id, c.is_immune, c.is_hidden, c.status
@@ -1006,8 +1135,8 @@ begin
     raise exception '这条评论已经下架，正在等待管理员审核。' using errcode = 'P0002';
   end if;
 
-  insert into public.rh_comment_reports (comment_id, reporter_id)
-  values (p_comment_id, v_user)
+  insert into public.rh_comment_reports (comment_id, reporter_id, reason)
+  values (p_comment_id, v_user, v_reason)
   on conflict (comment_id, reporter_id) do nothing;
 
   get diagnostics v_inserted = row_count;
@@ -1030,6 +1159,8 @@ begin
 end;
 $$;
 
+drop function if exists public.rh_admin_list_reported_comments();
+
 create or replace function public.rh_admin_list_reported_comments()
 returns table (
   id uuid,
@@ -1038,7 +1169,8 @@ returns table (
   author_label text,
   content text,
   created_at timestamptz,
-  report_count integer
+  report_count integer,
+  report_reasons text[]
 )
 language plpgsql
 stable
@@ -1058,7 +1190,13 @@ begin
     c.author_label,
     c.content,
     c.created_at,
-    (select count(*)::integer from public.rh_comment_reports r where r.comment_id = c.id)
+    (select count(*)::integer from public.rh_comment_reports r where r.comment_id = c.id),
+    coalesce(
+      (select array_agg(r.reason order by r.created_at)
+       from public.rh_comment_reports r
+       where r.comment_id = c.id),
+      array[]::text[]
+    )
   from public.rh_comments c
   join public.rh_posts p on p.id = c.post_id
   where c.status = 'pending'
@@ -1130,6 +1268,8 @@ $$;
 -- ------------------------------------------------------------
 
 revoke all on function public.rh_author_label(uuid) from public;
+revoke all on function public.rh_has_private_address(text) from public;
+revoke all on function public.rh_enforce_private_text() from public;
 revoke all on function public.rh_is_admin() from public;
 revoke all on function public.rh_touch_updated_at() from public;
 revoke all on function public.rh_list_posts() from public;
@@ -1146,7 +1286,7 @@ revoke all on function public.rh_add_comment(uuid, text) from public;
 revoke all on function public.rh_admin_list_posts(text) from public;
 revoke all on function public.rh_admin_stats() from public;
 revoke all on function public.rh_admin_review_post(uuid, text, text) from public;
-revoke all on function public.rh_report_comment(uuid) from public;
+revoke all on function public.rh_report_comment(uuid, text) from public;
 revoke all on function public.rh_admin_list_reported_comments() from public;
 revoke all on function public.rh_admin_review_comment(uuid, text) from public;
 
@@ -1165,7 +1305,7 @@ grant execute on function public.rh_add_comment(uuid, text) to authenticated;
 grant execute on function public.rh_admin_list_posts(text) to authenticated;
 grant execute on function public.rh_admin_stats() to authenticated;
 grant execute on function public.rh_admin_review_post(uuid, text, text) to authenticated;
-grant execute on function public.rh_report_comment(uuid) to authenticated;
+grant execute on function public.rh_report_comment(uuid, text) to authenticated;
 grant execute on function public.rh_admin_list_reported_comments() to authenticated;
 grant execute on function public.rh_admin_review_comment(uuid, text) to authenticated;
 

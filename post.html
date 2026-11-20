@@ -21,6 +21,35 @@
     <article id="articleRoot" hidden></article>
   </main>
 
+  <dialog class="dialog" id="commentReportDialog" aria-labelledby="commentReportTitle">
+    <form class="dialog__panel" id="commentReportForm">
+      <div class="dialog__head">
+        <div>
+          <p class="eyebrow">REPORT <span>/</span> 举报评论</p>
+          <h2 id="commentReportTitle">举报这条评论</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-report aria-label="关闭">×</button>
+      </div>
+      <p class="dialog__intro" id="reportedCommentPreview"></p>
+      <label class="field">
+        <span class="field__label"><span>举报原因 <b>必填</b></span></span>
+        <select id="commentReportReason">
+          <option value="隐私信息">泄露隐私信息</option>
+          <option value="人身攻击">人身攻击或辱骂</option>
+          <option value="广告引流">广告或引流</option>
+          <option value="不实信息">不实信息</option>
+          <option value="其他">其他</option>
+        </select>
+      </label>
+      <p class="form-hint">举报后这条评论会立即下架，等待管理员审核。审核通过后会恢复，并取消后续重复举报。</p>
+      <p class="form-hint form-hint--error" id="commentReportError" hidden></p>
+      <div class="dialog__actions">
+        <button class="btn btn--outline" type="button" data-close-report>取消</button>
+        <button class="btn btn--danger" type="submit" id="commentReportConfirm">确认举报</button>
+      </div>
+    </form>
+  </dialog>
+
   <div data-site-footer></div>
 
   <script src="config.js"></script>

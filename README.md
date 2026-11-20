@@ -81,9 +81,7 @@
     │  └─ rules.js
     ├─ supabase/
     │  ├─ schema.sql
-    │  ├─ add-admin.sql
-    │  ├─ add-delete.sql
-    │  └─ add-comment-moderation.sql
+    │  └─ add-admin.sql
     └─ assets/
        ├─ favicon.svg
        └─ vendor/supabase.js

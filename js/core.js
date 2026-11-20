@@ -39,6 +39,10 @@ export function friendlyError(error) {
   const message = messageOf(error);
   if (/invalid login credentials/i.test(message)) return "邮箱或密码不正确。";
   if (/email not confirmed/i.test(message)) return "邮箱还没有确认，请先完成邮箱验证。";
+  if (/already registered|already been registered/i.test(message)) return "这个邮箱已经绑定过账号，请直接用邮箱登录。";
+  if (/password should be at least|password.*6 characters/i.test(message)) return "密码至少需要 6 位。";
+  if (/unable to validate email|invalid email/i.test(message)) return "邮箱格式不正确。";
+  if (/for security purposes/i.test(message)) return "操作太频繁了，请稍后再试。";
   if (/anonymous.*(disabled|not.*enabled)/i.test(message)) {
     return "Supabase 的匿名登录未开启，请先在 Authentication 中开启 Anonymous Sign-Ins。";
   }
@@ -119,6 +123,35 @@ export async function signOut() {
   await db.auth.signOut({ scope: "local" });
 }
 
+export async function refreshUser() {
+  const db = requireClient();
+  const { data, error } = await db.auth.getUser();
+  if (error) throw error;
+  return data?.user || null;
+}
+
+export async function bindEmail(email, password) {
+  const db = requireClient();
+  const { data, error } = await db.auth.updateUser(
+    { email: String(email || "").trim(), password: String(password || "") },
+    { emailRedirectTo: window.location.origin + "/me.html?linked=1" }
+  );
+  if (error) throw error;
+  sessionPromise = null;
+  return data?.user || null;
+}
+
+export async function signInWithEmail(email, password) {
+  const db = requireClient();
+  const { data, error } = await db.auth.signInWithPassword({
+    email: String(email || "").trim(),
+    password: String(password || "")
+  });
+  if (error) throw error;
+  sessionPromise = null;
+  return data?.user || null;
+}
+
 export async function getAdminUser() {
   const session = await getSession();
   if (!session?.user) return null;
@@ -159,8 +192,11 @@ export const api = {
     return Array.isArray(rows) ? rows[0] || null : null;
   },
 
-  async reportComment(commentId) {
-    const rows = await rpc("rh_report_comment", { p_comment_id: commentId });
+  async reportComment(commentId, reason) {
+    const rows = await rpc("rh_report_comment", {
+      p_comment_id: commentId,
+      p_reason: reason
+    });
     return Array.isArray(rows) ? rows[0] || null : null;
   },
 

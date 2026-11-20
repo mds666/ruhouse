@@ -24,6 +24,7 @@ let post = null;
 let comments = [];
 let currentUser = null;
 let commentSubmit = null;
+let reportTargetId = null;
 
 function showLoading() {
   stateBox.hidden = false;
@@ -208,25 +209,63 @@ function bindArticle() {
     });
   });
 
-  root.querySelector("[data-comment-list]")?.addEventListener("click", async (event) => {
-    const button = event.target.closest("[data-report-comment]");
-    if (!button || !post) return;
-    if (!window.confirm("举报后这条评论会暂时下架，等待管理员审核。确定举报吗？")) return;
+  const reportDialog = document.getElementById("commentReportDialog");
+  const reportForm = document.getElementById("commentReportForm");
+  const reportPreview = document.getElementById("reportedCommentPreview");
+  const reportReason = document.getElementById("commentReportReason");
+  const reportError = document.getElementById("commentReportError");
+  const reportConfirm = document.getElementById("commentReportConfirm");
 
-    const commentId = button.dataset.reportComment;
-    button.disabled = true;
-    button.textContent = "举报中…";
+  root.querySelector("[data-comment-list]")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-report-comment]");
+    if (!button || !post || !reportDialog) return;
+    const comment = comments.find((item) => item.id === button.dataset.reportComment);
+    if (!comment) return;
+
+    reportTargetId = comment.id;
+    reportPreview.textContent = "“" + comment.content + "”";
+    reportReason.value = "隐私信息";
+    reportError.hidden = true;
+    reportConfirm.disabled = false;
+    reportConfirm.textContent = "确认举报";
+    reportDialog.showModal();
+  });
+
+  document.querySelectorAll("[data-close-report]").forEach((button) => {
+    button.addEventListener("click", () => {
+      reportTargetId = null;
+      reportDialog.close();
+    });
+  });
+
+  reportDialog?.addEventListener("click", (event) => {
+    if (event.target === reportDialog) {
+      reportTargetId = null;
+      reportDialog.close();
+    }
+  });
+
+  reportForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!reportTargetId) return;
+    reportError.hidden = true;
+    reportConfirm.disabled = true;
+    reportConfirm.textContent = "举报中…";
     try {
-      const row = await api.reportComment(commentId);
+      const row = await api.reportComment(reportTargetId, reportReason.value);
+      const commentId = reportTargetId;
+      reportTargetId = null;
+      reportDialog.close();
       comments = comments.filter((comment) => comment.id !== commentId);
       post.comments_count = Number(row?.comments_count ?? Math.max(0, post.comments_count - 1));
       updateCommentCount(post.comments_count);
       root.querySelector("[data-comment-list]").innerHTML = commentsHTML();
       showToast("已举报，评论已暂时下架，等待管理员审核。");
     } catch (error) {
-      button.disabled = false;
-      button.textContent = "举报";
-      showToast(friendlyError(error), "error");
+      reportError.hidden = false;
+      reportError.textContent = friendlyError(error);
+      reportConfirm.disabled = false;
+      reportConfirm.textContent = "确认举报";
     }
   });
 
