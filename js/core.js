@@ -402,6 +402,7 @@ export function renderShell(activePage) {
     ["wall", "wall.html", "避雷墙"],
     ["submit", "submit.html", "发布记录"],
     ["me", "me.html", "个人中心"],
+    ["leaderboard", "leaderboard.html", "排行榜"],
     ["rules", "rules.html", "规则"]
   ];
   const nav = links.map(([key, href, label]) => `
@@ -438,6 +439,7 @@ export function renderShell(activePage) {
             <a href="wall.html">避雷墙</a>
             <a href="submit.html">发布记录</a>
             <a href="me.html">个人中心</a>
+            <a href="leaderboard.html">首月排行榜</a>
             <a href="rules.html">发帖与审核规则</a>
           </nav>
           <div class="footer-meta">

@@ -81,7 +81,7 @@
 
 - / 首页
 - /wall.html 避雷墙：只显示审核通过的记录
-- /post.html?id=... 房间详情、投票、评论
+- /post.html?id=... 房间详情、点赞、评论
 - /submit.html 发布新记录
 - /submit.html?edit=... 修改自己的记录
 - /me.html 个人中心：审核状态、修改入口

@@ -214,7 +214,7 @@ function reviewItem(post) {
         <div class="tag-list">${tags}</div>
         ${note}
         <div class="review-item__actions">
-          <span class="review-item__counts">投票 ${Number(post.votes_count) || 0} · 评论 ${Number(post.comments_count) || 0}</span>
+          <span class="review-item__counts">点赞 ${Number(post.votes_count) || 0} · 评论 ${Number(post.comments_count) || 0}</span>
           <div class="review-buttons">
             ${canApprove ? '<button class="btn btn--small btn--primary" type="button" data-approve="' + escapeHTML(post.id) + '">通过</button>' : ""}
             ${canReject ? '<button class="btn btn--small btn--outline" type="button" data-reject="' + escapeHTML(post.id) + '">不通过</button>' : ""}

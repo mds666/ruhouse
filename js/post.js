@@ -104,7 +104,7 @@ function render() {
     ? '<a class="text-link" href="submit.html?edit=' + encodeURIComponent(post.id) + '">修改这条记录 <span aria-hidden="true">→</span></a>'
     : "";
   const votedClass = post.has_voted ? "is-voted" : "";
-  const votedLabel = post.has_voted ? "已投票" : "投票";
+  const votedLabel = post.has_voted ? "已点赞" : "点赞";
 
   root.innerHTML = `
     <header class="article-header">
@@ -181,9 +181,9 @@ function bindArticle() {
       post.votes_count = Number(result?.votes_count ?? (post.votes_count + 1));
       post.has_voted = Boolean(result?.has_voted ?? true);
       voteButton.classList.add("is-voted");
-      voteButton.querySelector("[data-vote-label]").textContent = "已投票";
+      voteButton.querySelector("[data-vote-label]").textContent = "已点赞";
       voteButton.querySelector("[data-vote-count]").textContent = String(post.votes_count);
-      showToast("投票已记录。");
+      showToast("点赞已记录。");
     } catch (error) {
       voteButton.disabled = false;
       showToast(friendlyError(error), "error");

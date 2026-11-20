@@ -15,6 +15,7 @@ const files = [
   "me.html",
   "admin.html",
   "rules.html",
+  "leaderboard.html",
   "styles.css",
   "config.js"
 ];

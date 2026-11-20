@@ -81,7 +81,7 @@ function postRow(post) {
         <div class="tag-list">${tags}</div>
       </div>
       <div class="post-row__stats">
-        <span><b>${Number(post.votes_count) || 0}</b>投票</span>
+        <span><b>${Number(post.votes_count) || 0}</b>点赞</span>
         <span><b>${Number(post.comments_count) || 0}</b>评论</span>
         <span class="post-row__arrow" aria-hidden="true">↗</span>
       </div>

@@ -21,7 +21,8 @@
 | --- | --- |
 | [index.html](index.html) | 首页 |
 | [wall.html](wall.html) | 避雷墙，只显示审核通过的记录 |
-| [post.html](post.html) | 房间详情、投票、评论 |
+| [post.html](post.html) | 房间详情、点赞、评论 |
+| [leaderboard.html](leaderboard.html) | 点赞 + 评论排行榜 |
 | [submit.html](submit.html) | 发布新记录 / 修改自己的记录 |
 | [me.html](me.html) | 个人中心与审核进度 |
 | [admin.html](admin.html) | 管理员登录与审核台 |
@@ -67,6 +68,7 @@
     ├─ me.html
     ├─ admin.html
     ├─ rules.html
+    ├─ leaderboard.html
     ├─ styles.css
     ├─ config.js
     ├─ server.mjs
