@@ -614,6 +614,58 @@ img {
   margin-top: 24px;
 }
 
+.wall-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.wall-search {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.wall-search .eyebrow {
+  font-size: 9px;
+}
+
+.wall-search input {
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  outline: none;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  transition: border-color 0.2s ease;
+}
+
+.wall-search input:focus {
+  border-color: var(--ink);
+}
+
+.wall-search input::placeholder {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+
+.wall-search-row .text-button {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .wall-search-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
 .wall-toolbar {
   display: flex;
   align-items: center;

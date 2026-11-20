@@ -27,6 +27,14 @@
     </header>
 
     <section class="wall-section" aria-label="房间记录">
+      <div class="wall-search-row">
+        <label class="wall-search">
+          <span class="eyebrow">SEARCH <span>/</span> 区域与站点</span>
+          <input id="wallSearch" type="search" placeholder="搜索地铁站、公交站、区域关键词…" autocomplete="off">
+        </label>
+        <button class="text-button" type="button" id="clearWallSearch" hidden>清除</button>
+      </div>
+
       <div class="wall-toolbar">
         <div class="tabs" role="tablist" aria-label="排序">
           <button class="tab is-active" type="button" role="tab" aria-selected="true" data-sort="latest">最新</button>

@@ -200,28 +200,32 @@ set search_path = public, pg_temp
 as $$
 declare
   v_text text := coalesce(p_text, '');
+  v_scan text;
 begin
-  if v_text ~ '(号楼|栋|幢|单元|门牌|房号|房间号)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,8}' then
+  -- 地铁线路编号（如“10号线”）不是门牌号，先替换掉再检查地址。
+  v_scan := regexp_replace(v_text, '[0-9〇零一二三四五六七八九十百]+号线', '地铁线路', 'g');
+
+  if v_scan ~ '(号楼|栋|幢|单元|门牌|房号|房间号)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,8}' then
     return true;
   end if;
 
-  if v_text ~ '(房号|房间号)[[:space:]]*[A-Za-z0-9-]{1,10}' then
+  if v_scan ~ '(房号|房间号)[[:space:]]*[A-Za-z0-9-]{1,10}' then
     return true;
   end if;
 
-  if v_text ~ '[0-9]{2,4}[[:space:]]*(室|层)' then
+  if v_scan ~ '[0-9]{2,4}[[:space:]]*(室|层)' then
     return true;
   end if;
 
-  if v_text ~ '[0-9一二三四五六七八九十百零〇]{1,5}[[:space:]]*(号|弄)' then
+  if v_scan ~ '[0-9一二三四五六七八九十百零〇]{1,5}[[:space:]]*(号|弄)' then
     return true;
   end if;
 
-  if v_text ~ '(路|街|巷|弄)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,5}' then
+  if v_scan ~ '(路|街|巷|弄)[[:space:]]*[0-9一二三四五六七八九十百零〇]{1,5}' then
     return true;
   end if;
 
-  if v_text ~ '(小区|花园|公寓|大厦|广场|新村|家园|苑).{0,12}(号楼|栋|幢|单元|室|号)' then
+  if v_scan ~ '(小区|花园|公寓|大厦|广场|新村|家园|苑).{0,12}(号楼|栋|幢|单元|室|号)' then
     return true;
   end if;
 
