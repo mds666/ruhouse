@@ -59,6 +59,7 @@ function commentsHTML() {
         <div class="comment__meta">
           <strong>${escapeHTML(comment.author_label || "匿名租客")}</strong>
           <span>${formatDate(comment.created_at)}</span>
+          ${comment.can_report ? '<button class="text-button text-button--danger comment__report" type="button" data-report-comment="' + escapeHTML(comment.id) + '">举报</button>' : ""}
         </div>
         <p>${escapeHTML(comment.content)}</p>
       </div>
@@ -207,6 +208,28 @@ function bindArticle() {
     });
   });
 
+  root.querySelector("[data-comment-list]")?.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-report-comment]");
+    if (!button || !post) return;
+    if (!window.confirm("举报后这条评论会暂时下架，等待管理员审核。确定举报吗？")) return;
+
+    const commentId = button.dataset.reportComment;
+    button.disabled = true;
+    button.textContent = "举报中…";
+    try {
+      const row = await api.reportComment(commentId);
+      comments = comments.filter((comment) => comment.id !== commentId);
+      post.comments_count = Number(row?.comments_count ?? Math.max(0, post.comments_count - 1));
+      updateCommentCount(post.comments_count);
+      root.querySelector("[data-comment-list]").innerHTML = commentsHTML();
+      showToast("已举报，评论已暂时下架，等待管理员审核。");
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = "举报";
+      showToast(friendlyError(error), "error");
+    }
+  });
+
   const form = root.querySelector("#commentForm");
   const input = root.querySelector("#commentInput");
   const guard = root.querySelector("#commentGuard");
@@ -248,7 +271,8 @@ function bindArticle() {
           author_label: row.author_label,
           content: row.content,
           created_at: row.created_at,
-          is_mine: true
+          is_mine: true,
+          can_report: false
         });
         post.comments_count = Number(row.comments_count ?? (post.comments_count + 1));
       }

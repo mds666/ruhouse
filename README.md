@@ -9,6 +9,7 @@
 - 管理员通过后才出现在避雷墙
 - 用户可以修改或删除自己的记录
 - 管理员可以删除任何记录
+- 评论可以被举报；被举报后暂时下架，管理员通过后恢复并获得免举报标记
 - 修改后重新审核
 - 个人中心可以看到审核状态与未通过原因
 
@@ -80,7 +81,9 @@
     │  └─ rules.js
     ├─ supabase/
     │  ├─ schema.sql
-    │  └─ add-admin.sql
+    │  ├─ add-admin.sql
+    │  ├─ add-delete.sql
+    │  └─ add-comment-moderation.sql
     └─ assets/
        ├─ favicon.svg
        └─ vendor/supabase.js

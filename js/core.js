@@ -159,6 +159,11 @@ export const api = {
     return Array.isArray(rows) ? rows[0] || null : null;
   },
 
+  async reportComment(commentId) {
+    const rows = await rpc("rh_report_comment", { p_comment_id: commentId });
+    return Array.isArray(rows) ? rows[0] || null : null;
+  },
+
   async createPost(payload) {
     const rows = await rpc("rh_create_post", {
       p_title: payload.title,
@@ -220,6 +225,18 @@ export const api = {
 
   async adminDeletePost(postId) {
     const rows = await rpc("rh_admin_delete_post", { p_post_id: postId });
+    return Array.isArray(rows) ? rows[0] || null : null;
+  },
+
+  async adminListReportedComments() {
+    return (await rpc("rh_admin_list_reported_comments")) || [];
+  },
+
+  async adminReviewComment(commentId, decision) {
+    const rows = await rpc("rh_admin_review_comment", {
+      p_comment_id: commentId,
+      p_decision: decision
+    });
     return Array.isArray(rows) ? rows[0] || null : null;
   }
 };

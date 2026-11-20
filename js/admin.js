@@ -31,6 +31,10 @@ const elements = {
   state: document.getElementById("adminState"),
   list: document.getElementById("adminList"),
   refresh: document.getElementById("adminRefresh"),
+  commentQueue: document.getElementById("commentQueue"),
+  commentState: document.getElementById("commentQueueState"),
+  reportedCommentCount: document.getElementById("reportedCommentCount"),
+  commentRefresh: document.getElementById("adminCommentRefresh"),
   rejectDialog: document.getElementById("rejectDialog"),
   rejectForm: document.getElementById("rejectForm"),
   rejectTitle: document.getElementById("rejectTitle"),
@@ -45,7 +49,9 @@ const state = {
   loading: false,
   posts: [],
   adminUser: null,
-  rejectId: null
+  rejectId: null,
+  reportedComments: [],
+  commentsLoading: false
 };
 
 function showLogin(message = "") {
@@ -76,6 +82,15 @@ function setQueueState(message = "", loading = false) {
     : "";
 }
 
+function setCommentState(message = "", loading = false) {
+  elements.commentState.hidden = !message;
+  elements.commentState.innerHTML = message
+    ? (loading
+      ? '<span class="loader" aria-hidden="true"></span><span>' + escapeHTML(message) + "</span>"
+      : "<p>" + escapeHTML(message) + "</p>")
+    : "";
+}
+
 function updateStats(stats) {
   const values = {
     pending: Number(stats?.pending) || 0,
@@ -85,6 +100,78 @@ function updateStats(stats) {
   elements.stats.forEach((node) => {
     node.textContent = String(values[node.dataset.stat] || 0);
   });
+}
+
+function commentReviewItem(comment) {
+  return `
+    <article class="comment-review-item" data-comment-review-id="${escapeHTML(comment.id)}">
+      <div class="comment-review-item__topline">
+        <span>被举报 ${Number(comment.report_count) || 1} 次</span>
+        <span>${formatDateTime(comment.created_at)}</span>
+      </div>
+      <p class="comment-review-item__content">${escapeHTML(comment.content)}</p>
+      <p class="comment-review-item__meta">
+        ${escapeHTML(comment.author_label || "匿名租客")} · 来自「${escapeHTML(comment.post_title || "房间记录")}」
+      </p>
+      <div class="comment-review-item__actions">
+        <button class="btn btn--small btn--primary" type="button" data-approve-comment="${escapeHTML(comment.id)}">恢复并免举报</button>
+        <button class="btn btn--small btn--outline" type="button" data-reject-comment="${escapeHTML(comment.id)}">不恢复</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderComments() {
+  elements.reportedCommentCount.textContent = String(state.reportedComments.length);
+  if (state.commentsLoading) {
+    setCommentState("正在读取被举报评论", true);
+    elements.commentQueue.innerHTML = "";
+    return;
+  }
+  if (!state.reportedComments.length) {
+    setCommentState("目前没有被举报的评论。", false);
+    elements.commentQueue.innerHTML = "";
+    return;
+  }
+  setCommentState("", false);
+  elements.commentQueue.innerHTML = state.reportedComments.map(commentReviewItem).join("");
+}
+
+async function loadComments() {
+  if (state.commentsLoading) return;
+  state.commentsLoading = true;
+  renderComments();
+  try {
+    state.reportedComments = await api.adminListReportedComments();
+    state.commentsLoading = false;
+    renderComments();
+  } catch (error) {
+    state.commentsLoading = false;
+    elements.commentQueue.innerHTML = "";
+    elements.commentState.hidden = false;
+    renderError(elements.commentState, error, loadComments);
+  }
+}
+
+async function reviewComment(commentId, decision, button) {
+  const comment = state.reportedComments.find((item) => item.id === commentId);
+  if (!comment) return;
+  const message = decision === "approved"
+    ? "恢复这条评论，并标记为免举报？之后其他用户不能再举报它。"
+    : "确定不恢复这条评论？它会继续下架，不再公开。";
+  if (!window.confirm(message)) return;
+
+  button.disabled = true;
+  button.textContent = decision === "approved" ? "恢复中…" : "处理中…";
+  try {
+    await api.adminReviewComment(commentId, decision);
+    showToast(decision === "approved" ? "评论已恢复，并获得免举报标记。" : "评论已下架。");
+    await loadQueue();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = decision === "approved" ? "恢复并免举报" : "不恢复";
+    showToast(friendlyError(error), "error");
+  }
 }
 
 function imageStrip(images) {
@@ -165,6 +252,7 @@ async function loadQueue() {
     state.posts = posts;
     state.loading = false;
     renderQueue();
+    loadComments();
   } catch (error) {
     state.loading = false;
     console.error(error);
@@ -247,6 +335,18 @@ elements.list.addEventListener("click", (event) => {
   const deleteButton = event.target.closest("[data-delete-post]");
   if (deleteButton) deletePost(deleteButton.dataset.deletePost, deleteButton);
 });
+
+elements.commentQueue.addEventListener("click", (event) => {
+  const approveButton = event.target.closest("[data-approve-comment]");
+  if (approveButton) {
+    reviewComment(approveButton.dataset.approveComment, "approved", approveButton);
+    return;
+  }
+  const rejectButton = event.target.closest("[data-reject-comment]");
+  if (rejectButton) reviewComment(rejectButton.dataset.rejectComment, "rejected", rejectButton);
+});
+
+elements.commentRefresh.addEventListener("click", loadComments);
 
 elements.filterTabs.forEach((tab) => {
   tab.addEventListener("click", () => {

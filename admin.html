@@ -66,6 +66,30 @@
         </article>
       </div>
 
+      <section class="admin-comment-moderation" aria-labelledby="commentReviewTitle">
+        <div class="admin-section-heading">
+          <div>
+            <p class="eyebrow">COMMENTS <span>/</span> 评论审核</p>
+            <h2 id="commentReviewTitle">被举报评论 <span class="count-badge" id="reportedCommentCount">0</span></h2>
+          </div>
+          <button class="text-button" type="button" id="adminCommentRefresh">刷新</button>
+        </div>
+        <div class="admin-state" id="commentQueueState" aria-live="polite">
+          <span class="loader" aria-hidden="true"></span>
+          <span>正在读取被举报评论</span>
+        </div>
+        <div class="comment-review-list" id="commentQueue"></div>
+      </section>
+
+      <div class="admin-section-divider"></div>
+
+      <div class="admin-section-heading admin-section-heading--posts">
+        <div>
+          <p class="eyebrow">POSTS <span>/</span> 帖子审核</p>
+          <h2>房间记录</h2>
+        </div>
+      </div>
+
       <div class="admin-toolbar">
         <div class="tabs" role="tablist" aria-label="筛选审核状态">
           <button class="tab is-active" type="button" role="tab" aria-selected="true" data-admin-filter="pending">待审核</button>

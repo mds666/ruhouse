@@ -3661,3 +3661,121 @@ img {
   margin-left: 2px;
   white-space: nowrap;
 }
+
+.comment__report {
+  margin-left: auto;
+  color: var(--rust);
+  font-size: 10px;
+}
+
+.admin-comment-moderation {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.admin-section-heading h2 {
+  margin-top: 7px;
+  font-size: clamp(25px, 2.8vw, 32px);
+  line-height: 1.2;
+}
+
+.admin-section-heading--posts {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.admin-comment-moderation .admin-state {
+  min-height: 90px;
+}
+
+.admin-section-divider {
+  margin: 28px 0 22px;
+  border-top: 1px solid var(--line);
+}
+
+.count-badge {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid #c5d5c8;
+  border-radius: 20px;
+  background: var(--pine-soft);
+  color: var(--pine);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  vertical-align: 2px;
+}
+
+.comment-review-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-review-item {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.comment-review-item__topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--rust);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.comment-review-item__topline span + span {
+  color: var(--faint);
+}
+
+.comment-review-item__content {
+  max-width: 820px;
+  margin: 10px 0;
+  padding: 11px 14px;
+  border-left: 2px solid var(--rust);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.comment-review-item__meta {
+  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.comment-review-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .admin-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .comment__report {
+    margin-left: 0;
+  }
+}
