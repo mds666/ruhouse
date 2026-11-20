@@ -72,10 +72,7 @@ alter table public.rh_posts
   add constraint rh_posts_status_check
   check (status in ('pending', 'approved', 'rejected'));
 
--- The request explicitly removes the sample rooms.
-delete from public.rh_posts
-where user_id is null;
-
+-- Orphaned posts (user deleted their email account) are intentionally preserved.
 create index if not exists rh_posts_public_created_idx
   on public.rh_posts (status, is_hidden, created_at desc);
 
@@ -299,7 +296,7 @@ $$;
 
 drop trigger if exists rh_posts_touch_updated_at on public.rh_posts;
 create trigger rh_posts_touch_updated_at
-before update on public.rh_posts
+before update of title, body, images, tags, duration, status, review_note, is_hidden on public.rh_posts
 for each row execute function public.rh_touch_updated_at();
 
 drop trigger if exists rh_posts_privacy_insert on public.rh_posts;
@@ -1267,6 +1264,27 @@ begin
 end;
 $$;
 
+-- Used by the Netlify admin function after an Auth account is deleted.
+-- Deleting the Auth user cascades votes; this restores the cached counters.
+create or replace function public.rh_recount_post_stats()
+returns void
+language sql
+security definer
+set search_path = public, pg_temp
+as $$
+  update public.rh_posts p
+  set votes_count = (
+        select count(*)::integer from public.rh_votes v where v.post_id = p.id
+      ),
+      comments_count = (
+        select count(*)::integer
+        from public.rh_comments c
+        where c.post_id = p.id
+          and c.status = 'published'
+          and c.is_hidden = false
+      );
+$$;
+
 -- ------------------------------------------------------------
 -- Function grants
 -- ------------------------------------------------------------
@@ -1293,6 +1311,7 @@ revoke all on function public.rh_admin_review_post(uuid, text, text) from public
 revoke all on function public.rh_report_comment(uuid, text) from public;
 revoke all on function public.rh_admin_list_reported_comments() from public;
 revoke all on function public.rh_admin_review_comment(uuid, text) from public;
+revoke all on function public.rh_recount_post_stats() from public;
 
 grant execute on function public.rh_list_posts() to anon, authenticated;
 grant execute on function public.rh_get_post(uuid) to anon, authenticated;
@@ -1312,6 +1331,7 @@ grant execute on function public.rh_admin_review_post(uuid, text, text) to authe
 grant execute on function public.rh_report_comment(uuid, text) to authenticated;
 grant execute on function public.rh_admin_list_reported_comments() to authenticated;
 grant execute on function public.rh_admin_review_comment(uuid, text) to authenticated;
+grant execute on function public.rh_recount_post_stats() to service_role;
 
 -- ------------------------------------------------------------
 -- Storage: room-photos

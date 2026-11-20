@@ -10,8 +10,10 @@
 - 用户可以修改或删除自己的记录
 - 管理员可以删除任何记录
 - 评论可以被举报；被举报后暂时下架，管理员通过后恢复并获得免举报标记
+- 点赞 + 评论排行榜
 - 修改后重新审核
 - 个人中心可以看到审核状态与未通过原因
+- 管理员可以删除邮箱账号，帖子保留为公开记录
 
 ---
 
@@ -53,10 +55,28 @@
 3. 修改 [supabase/add-admin.sql](supabase/add-admin.sql) 里的邮箱并执行
 4. 打开 /admin.html 登录审核台
 
-> schema.sql 会删除 user_id IS NULL 的旧示例记录。  
-> 这是按「先删掉示例」的要求处理的。
+> schema.sql 不再删除 user_id IS NULL 的帖子。  
+> 这些帖子是邮箱账号被删除后保留的公开记录。
 
 ---
+
+## 管理员删除邮箱账号
+
+管理员后台底部可以按邮箱删除账号。删除后：
+
+- 该邮箱无法再登录
+- 帖子继续公开保留，但不再属于个人中心
+- 评论保留
+- 点赞记录会删除，并重新计算帖子计数
+
+这个操作通过 Netlify Function 调用 Supabase Admin API，必须在 Netlify 配置：
+
+    SUPABASE_SERVICE_ROLE_KEY
+
+值为 Supabase 的 service_role key，只放在 Netlify 环境变量里，不要写进代码或发给别人。
+
+---
+
 
 ## 文件结构
 

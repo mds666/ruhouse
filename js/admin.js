@@ -35,6 +35,10 @@ const elements = {
   commentState: document.getElementById("commentQueueState"),
   reportedCommentCount: document.getElementById("reportedCommentCount"),
   commentRefresh: document.getElementById("adminCommentRefresh"),
+  deleteEmailForm: document.getElementById("deleteEmailForm"),
+  deleteEmailInput: document.getElementById("deleteEmailInput"),
+  deleteEmailButton: document.getElementById("deleteEmailButton"),
+  deleteEmailState: document.getElementById("deleteEmailState"),
   rejectDialog: document.getElementById("rejectDialog"),
   rejectForm: document.getElementById("rejectForm"),
   rejectTitle: document.getElementById("rejectTitle"),
@@ -351,6 +355,44 @@ elements.commentQueue.addEventListener("click", (event) => {
 });
 
 elements.commentRefresh.addEventListener("click", loadComments);
+
+elements.deleteEmailForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const email = elements.deleteEmailInput.value.trim().toLowerCase();
+  elements.deleteEmailState.hidden = true;
+
+  if (!email || !email.includes("@")) {
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint form-hint--error";
+    elements.deleteEmailState.textContent = "请输入有效邮箱。";
+    elements.deleteEmailInput.focus();
+    return;
+  }
+
+  if (!window.confirm(
+    "删除 " + email + " 的邮箱账号？\n\n帖子会继续公开保留，但用户将无法再登录和编辑。管理员账号不能删除。"
+  )) return;
+
+  elements.deleteEmailButton.disabled = true;
+  elements.deleteEmailButton.textContent = "删除中…";
+  try {
+    const result = await api.adminDeleteEmailAccount(email);
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint";
+    elements.deleteEmailState.textContent = result.warning
+      ? result.warning
+      : "邮箱账号已删除。帖子已保留，用户现在只能以新的匿名身份使用网站。";
+    elements.deleteEmailInput.value = "";
+    showToast("邮箱账号已删除，帖子已保留。", "success", 5000);
+  } catch (error) {
+    elements.deleteEmailState.hidden = false;
+    elements.deleteEmailState.className = "form-hint form-hint--error";
+    elements.deleteEmailState.textContent = friendlyError(error);
+  } finally {
+    elements.deleteEmailButton.disabled = false;
+    elements.deleteEmailButton.textContent = "删除邮箱账号";
+  }
+});
 
 elements.filterTabs.forEach((tab) => {
   tab.addEventListener("click", () => {

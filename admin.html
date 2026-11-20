@@ -105,6 +105,27 @@
         <span>正在读取审核队列</span>
       </div>
       <div class="review-list" id="adminList"></div>
+
+      <div class="admin-section-divider"></div>
+
+      <section class="admin-account-moderation" aria-labelledby="accountDeleteTitle">
+        <div class="admin-section-heading">
+          <div>
+            <p class="eyebrow">ACCOUNTS <span>/</span> 邮箱账号</p>
+            <h2 id="accountDeleteTitle">删除邮箱账号</h2>
+          </div>
+          <span class="status status--pending"><i aria-hidden="true"></i>危险操作</span>
+        </div>
+        <p class="admin-account-warning">删除后这个邮箱无法再登录。帖子会继续公开保留，但不再属于任何个人中心，用户也不能再编辑。管理员账号不能在这里删除。</p>
+        <form class="admin-delete-form" id="deleteEmailForm" novalidate>
+          <label class="field">
+            <span class="field__label"><span>要删除的邮箱</span></span>
+            <input id="deleteEmailInput" type="email" autocomplete="off" placeholder="name@example.com">
+          </label>
+          <button class="btn btn--danger" type="submit" id="deleteEmailButton">删除邮箱账号</button>
+        </form>
+        <p class="form-hint" id="deleteEmailState" aria-live="polite" hidden></p>
+      </section>
     </section>
   </main>
 

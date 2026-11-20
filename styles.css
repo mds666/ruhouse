@@ -3827,6 +3827,53 @@ img {
   margin-top: 12px;
 }
 
+.admin-account-moderation {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-account-warning {
+  max-width: 760px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.9;
+}
+
+.admin-delete-form {
+  display: flex;
+  max-width: 700px;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-delete-form .field {
+  flex: 1;
+}
+
+.admin-delete-form .btn {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.admin-account-moderation .form-hint {
+  max-width: 700px;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .admin-delete-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-delete-form .btn {
+    width: 100%;
+  }
+}
+
 .account-panel {
   margin-top: 22px;
   padding: 24px;
