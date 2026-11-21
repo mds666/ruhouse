@@ -15,25 +15,27 @@
   <main class="page shell leaderboard-page">
     <header class="page-heading">
       <div>
-        <p class="eyebrow">LEADERBOARD <span>/</span> 点赞与评论</p>
-        <h1>排行榜</h1>
-        <p class="page-intro">只统计已通过审核的记录。收到的点赞和评论都算分；同一作者的多条记录合并计算。</p>
+        <p class="eyebrow">LEADERBOARD <span>/</span> 月度排行</p>
+        <h1>每月排行榜</h1>
+        <p class="page-intro">每月独立结算，只统计当月发布的已审核记录。点赞和评论都算分，同一作者的多条记录合并计算。</p>
       </div>
       <div class="page-side-note">
-        <p>计分方式</p>
-        <strong>点赞 ×1 + 评论 ×1<br>同一作者合并计算</strong>
-        <a class="text-link" href="rules.html">首月奖励规则 <span aria-hidden="true">↗</span></a>
+        <p>每月奖金</p>
+        <strong>第一 ¥90 · 第二 ¥60<br>第三 ¥50 · 月总奖金 ¥200</strong>
+        <a class="text-link" href="rules.html">奖励规则 <span aria-hidden="true">↗</span></a>
       </div>
     </header>
 
     <div class="board-note">
-      <span class="eyebrow">FIRST MONTH / 2026-11</span>
-      <p>首月 100 元奖励按 2026 年 11 月的累计分数结算。这个页面展示当前累计榜，方便随时查看位置。</p>
+      <span class="eyebrow">10 MONTHS / 2026-11 — 2027-08</span>
+      <p>连续 10 个月，总奖金 ¥2000。每月前三名分别获得 ¥90、¥60、¥50；当月不足 3 位时按实际名次发放。</p>
     </div>
+
+    <div class="board-months" id="boardMonths" role="tablist" aria-label="选择排行榜月份"></div>
 
     <section class="board" aria-labelledby="boardTitle">
       <div class="board-heading">
-        <h2 id="boardTitle">当前榜单</h2>
+        <h2 id="boardTitle">本月榜单</h2>
         <span id="boardCount">正在读取…</span>
       </div>
       <div class="board-head" aria-hidden="true">
