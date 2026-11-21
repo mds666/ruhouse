@@ -24,6 +24,7 @@ const state = {
   filter: "all",
   loading: true,
   user: null,
+  isAdmin: false,
   accountNotice: ""
 };
 
@@ -166,6 +167,9 @@ function renderAccount() {
       <p class="account-panel__intro">当前邮箱：<strong>${escapeHTML(email)}</strong>。换设备或清除浏览器数据后，用这个邮箱和密码登录，之前的帖子仍然在。</p>
       ${accountMessageHTML()}
       <div class="account-panel__actions">
+        ${state.isAdmin
+          ? '<a class="btn btn--primary" href="admin.html">进入管理员审核台</a>'
+          : ""}
         <button class="text-button text-button--danger" type="button" id="accountSignOut">退出登录</button>
       </div>
     `;
@@ -308,7 +312,8 @@ function renderAccount() {
     button.textContent = "登录中…";
     try {
       await signInWithEmail(email, password);
-      window.location.href = "me.html?logged=1";
+      const admin = await api.isAdmin().catch(() => false);
+      window.location.href = admin ? "admin.html" : "me.html?logged=1";
     } catch (error) {
       loginMessage.hidden = false;
       loginMessage.textContent = friendlyError(error);
@@ -352,6 +357,7 @@ async function load() {
       console.warn("User refresh failed:", refreshError);
     }
     state.posts = await api.listMyPosts();
+    state.isAdmin = await api.isAdmin().catch(() => false);
     state.loading = false;
     render();
     renderAccount();
