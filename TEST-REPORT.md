@@ -148,6 +148,16 @@
 - 已登录管理员在个人中心显示「进入管理员审核台」
 - 未登录和普通用户不会看到管理员入口
 
+### 3.3 SEO 文件
+
+- `/sitemap.xml` 返回 200
+- `/robots.txt` 返回 200，包含 sitemap 地址
+- 首页包含 canonical、WebSite JSON-LD
+- 避雷墙、提交页、规则页、排行榜包含 canonical
+- 管理员页 noindex
+- 个人中心 noindex
+- 尚未提交到 Google / Bing / 百度，收录需要人工验证站点
+
 ---
 
 ## 4. 数据库与业务逻辑测试
