@@ -519,6 +519,25 @@ Supabase 不支持把永久邮箱账号直接降级回原匿名身份。
 - Supabase Logs 检查 Auth / PostgREST 错误
 - 管理员后台定期处理待审核和被举报内容
 
+### SEO / 搜索引擎收录
+
+站点已包含：
+
+- `sitemap.xml`
+- `robots.txt`，并声明 sitemap
+- 首页 / 避雷墙 / 提交页 / 规则页 / 排行榜 canonical
+- 首页 WebSite JSON-LD，包含名称与 `ruhouse` 别名
+- 管理员页和个人中心 noindex
+
+还需要人工提交：
+
+1. Google Search Console：添加 `https://cozy-dodol-24777a.netlify.app` 并验证
+2. Bing Webmaster Tools：提交 sitemap
+3. 百度搜索资源平台：提交站点和 sitemap
+4. 提交后通常需要数天到数周才开始收录
+
+搜索引擎收录不是即时的。仅搜索“ruhouse”可能与 ruhaus 等其他品牌混淆，建议同时搜索“垃圾房子 Rubbish House”或“垃圾房子 租房避雷”。
+
 ---
 
 ## 14. 安全与凭据

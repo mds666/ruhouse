@@ -17,7 +17,8 @@ const files = [
   "rules.html",
   "leaderboard.html",
   "styles.css",
-  "config.js"
+  "config.js",
+  "sitemap.xml"
 ];
 
 for (const file of files) {
@@ -30,7 +31,7 @@ for (const directory of ["js", "assets"]) {
 
 await writeFile(
   join(dist, "robots.txt"),
-  "User-agent: *\nAllow: /\nDisallow: /admin.html\n",
+  "User-agent: *\nAllow: /\nDisallow: /admin.html\nDisallow: /me.html\nSitemap: https://cozy-dodol-24777a.netlify.app/sitemap.xml\n",
   "utf8"
 );
 
