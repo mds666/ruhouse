@@ -92,6 +92,10 @@
     ├─ styles.css
     ├─ config.js
     ├─ server.mjs
+    ├─ build.mjs
+    ├─ netlify.toml
+    ├─ HANDOVER.md
+    ├─ TEST-REPORT.md
     ├─ js/
     │  ├─ core.js
     │  ├─ home.js
@@ -100,7 +104,11 @@
     │  ├─ submit.js
     │  ├─ me.js
     │  ├─ admin.js
+    │  ├─ leaderboard.js
     │  └─ rules.js
+    ├─ netlify/
+    │  └─ functions/
+    │     └─ admin-delete-user.mjs
     ├─ supabase/
     │  ├─ schema.sql
     │  └─ add-admin.sql

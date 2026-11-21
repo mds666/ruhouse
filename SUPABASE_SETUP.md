@@ -16,7 +16,7 @@
 
 - 保持原有 rh_posts / rh_votes / rh_comments
 - 增加审核状态、审核说明、更新时间等字段
-- 删除之前的 6 条示例记录（user_id IS NULL）
+- 保留 user_id 为 NULL 的帖子（邮箱账号删除后留下的公开记录）
 - 新增管理员表 rh_admins
 - 新增或更新所有审核 / 个人中心函数
 - 保留 Storage 图片桶与上传策略

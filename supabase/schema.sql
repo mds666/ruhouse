@@ -167,6 +167,9 @@ revoke all on table public.rh_comments from anon, authenticated;
 revoke all on table public.rh_comment_reports from anon, authenticated;
 revoke all on table public.rh_admins from anon, authenticated;
 
+-- The Netlify admin function checks rh_admins with the service role key.
+grant select, insert, update, delete on table public.rh_admins to service_role;
+
 -- ------------------------------------------------------------
 -- Helpers
 -- ------------------------------------------------------------
@@ -1282,7 +1285,8 @@ as $$
         where c.post_id = p.id
           and c.status = 'published'
           and c.is_hidden = false
-      );
+      )
+  where true;
 $$;
 
 -- ------------------------------------------------------------
